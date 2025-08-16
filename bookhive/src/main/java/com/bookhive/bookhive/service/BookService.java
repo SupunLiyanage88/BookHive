@@ -1,5 +1,8 @@
 package com.bookhive.bookhive.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.bookhive.bookhive.dto.Book.BookRequestDTO;
@@ -15,6 +18,12 @@ public class BookService {
 
     private final BookReopository bookRepository;
 
+    //book get
+    public List<BookEntity> getAllBooks(){
+        return bookRepository.findAll();
+    }
+
+    //Book add
     public BookResponseDTO addBook(BookRequestDTO req) {
 
         BookEntity book = new BookEntity();
@@ -30,6 +39,34 @@ public class BookService {
         }
         return new BookResponseDTO("Book Added Successfully", null);
         
+    }
+
+    // book update
+    public BookResponseDTO updateBook(BookRequestDTO req, Long bookId) {
+        Optional<BookEntity> bookOptional = bookRepository.findById(bookId);
+        if(bookOptional.isEmpty()){
+            return new BookResponseDTO(null, "Book not found");
+        }
+        BookEntity book = bookOptional.get();
+        book.setTitle(req.getTitle());
+        book.setAuthor(req.getAuthor());
+        book.setGenre(req.getGenre());
+        book.setStatus(req.getStatus());
+
+        bookRepository.save(book);
+        return new BookResponseDTO("Book Updated Successfully", null);
+    }
+
+    // book delete
+    public BookResponseDTO deleteBook(Long bookId) {
+        Optional<BookEntity> bookOptional = bookRepository.findById(bookId);
+        if(bookOptional.isEmpty()){
+            return new BookResponseDTO(null, "Book not found");
+        }
+        bookRepository.deleteById(bookId);
+
+        return new BookResponseDTO("Book Deleted Successfully", null);
+    
     }
     
 }
