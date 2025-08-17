@@ -1,4 +1,4 @@
-# Library Management System
+# BookHive - Library Management System
 
 A full-stack library management application built with React (Vite) frontend and Spring Boot backend, featuring JWT authentication and comprehensive book and rental management.
 
