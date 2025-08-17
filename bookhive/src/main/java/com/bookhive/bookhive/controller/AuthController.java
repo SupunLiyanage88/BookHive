@@ -9,7 +9,6 @@ import com.bookhive.bookhive.dto.user.RegisterRequestDTO;
 import com.bookhive.bookhive.dto.user.RegisterResponseDTO;
 import com.bookhive.bookhive.entity.UserEntity;
 import com.bookhive.bookhive.service.AuthService;
-import com.bookhive.bookhive.service.JWTService;
 import com.bookhive.bookhive.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class AuthController {
     private final AuthService authService;
     private final UserService userService;
-    private final JWTService jwtService;
 
     @GetMapping("/all")
     public List<UserEntity> getAllusers() {
