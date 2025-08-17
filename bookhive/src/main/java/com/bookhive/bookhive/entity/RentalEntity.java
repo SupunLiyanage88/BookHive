@@ -19,7 +19,7 @@ public class RentalEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long rentalId; // Primary key
+    private Long rentalId; 
     @Column(nullable = false)
     private Long bookId;
     @Column(nullable = false)
