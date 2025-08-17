@@ -56,8 +56,8 @@ A full-stack library management application built with React (Vite) frontend and
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd library-management-backend
+   git clone [<repository-url>](https://github.com/SupunLiyanage88/BookHive.git)
+   cd bookhive
    ```
 
 2. **Start XAMPP**
@@ -65,10 +65,10 @@ A full-stack library management application built with React (Vite) frontend and
    - Start Apache and MySQL services
 
 3. **Database Configuration**
-   - Create a new database named `library_db` in phpMyAdmin
+   - Create a new database named `bmd_db` in phpMyAdmin
    - Update `application.properties` with your database credentials:
    ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/library_db
+   spring.datasource.url=jdbc:mysql://localhost:3306/bmd_db
    spring.datasource.username=root
    spring.datasource.password=
    spring.jpa.hibernate.ddl-auto=update
@@ -199,13 +199,7 @@ library-management-system/
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🤝 Support
-
-For support and questions, please contact the development team or create an issue in the repository.
 
 ---
 
