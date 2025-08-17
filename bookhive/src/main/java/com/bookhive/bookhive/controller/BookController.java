@@ -34,6 +34,17 @@ public class BookController {
         return bookService.getAllBooks();
     }
 
+    // Endpoint to get a book by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<BookEntity> getBookById(@PathVariable("id") Long bookId) {
+        try {
+            BookEntity book = bookService.getBookById(bookId);
+            return ResponseEntity.ok(book);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // Endpoint to add a new book
     @PostMapping("/add")
     public ResponseEntity<BookResponseDTO> addBook(@RequestBody BookRequestDTO bookRequestDTO) {
