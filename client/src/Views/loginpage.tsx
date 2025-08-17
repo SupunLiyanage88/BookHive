@@ -6,16 +6,15 @@ import {
   Button,
   Paper,
   Link,
-  Divider,
   InputAdornment,
   IconButton
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import UserApi from '../api/userApi';
-import { useNavigate } from 'react-router-dom'; // For navigation after login
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
-    const [username, setUsername] = useState(''); // Changed from email to username
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +24,7 @@ const LoginPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (username === '' || password === '') {
+        if (!username || !password) {
             setError('Please enter both username and password.');
             return;
         }
@@ -34,22 +33,13 @@ const LoginPage: React.FC = () => {
         setError('');
 
         try {
-            const response = await UserApi.login({
-                username,
-                password
-            });
+            const response = await UserApi.login({ username, password });
 
             if (response.error) {
                 setError(response.error || 'Login failed. Please try again.');
-            } else {
-                // Login successful
-                // Store the token (you might want to use context or state management)
-                if (response.token) {
-                    localStorage.setItem('authToken', response.token);
-                }
-                
-                // Redirect to dashboard or home page
-                navigate('/dashboard');
+            } else if (response.token) {
+                localStorage.setItem('authToken', response.token);
+                navigate('/homepage');
             }
         } catch (err) {
             setError('An unexpected error occurred. Please try again.');
@@ -57,6 +47,11 @@ const LoginPage: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleDemoLogin = () => {
+        setUsername('demologin');
+        setPassword('demo123');
     };
 
     return (
@@ -84,16 +79,12 @@ const LoginPage: React.FC = () => {
                     color: 'primary.main',
                     textAlign: 'center'
                 }}>
-                    BookHive
-                </Typography>
-                
-                <Typography variant="h6" component="h2" sx={{ mb: 3, textAlign: 'center' }}>
-                    Welcome back! Please login
+                    Login
                 </Typography>
                 
                 <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     <TextField
-                        label="Username" // Changed from Email to Username
+                        label="Username"
                         variant="outlined"
                         fullWidth
                         value={username}
@@ -142,33 +133,24 @@ const LoginPage: React.FC = () => {
                     >
                         {isLoading ? 'Logging in...' : 'Login'}
                     </Button>
-                    
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Link href="/register" variant="body2" underline="hover">
-                            Create account
-                        </Link>
-                        <Link href="/forgot-password" variant="body2" underline="hover">
-                            Forgot password?
-                        </Link>
-                    </Box>
-                    
-                    <Divider sx={{ my: 2 }}>or</Divider>
-                    
+
                     <Button
                         variant="outlined"
                         fullWidth
                         sx={{ py: 1.5 }}
-                        onClick={() => alert('Google login coming soon')}
+                        onClick={handleDemoLogin}
                         disabled={isLoading}
                     >
-                        Continue with Google
+                        Demo Login
                     </Button>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Link href="/register" variant="body2" underline="hover">
+                            Don't have an account? Register
+                        </Link>
+                    </Box>
                 </Box>
             </Paper>
-            
-            <Typography variant="body2" sx={{ mt: 3, color: 'text.secondary' }}>
-                © {new Date().getFullYear()} BookHive. All rights reserved.
-            </Typography>
         </Box>
     );
 };

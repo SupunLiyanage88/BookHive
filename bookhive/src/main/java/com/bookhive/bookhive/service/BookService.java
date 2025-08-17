@@ -23,6 +23,16 @@ public class BookService {
         return bookRepository.findAll();
     }
 
+    // book get by id
+    public BookEntity getBookById(Long bookId) {
+        Optional<BookEntity> bookOptional = bookRepository.findById(bookId);
+        if (bookOptional.isPresent()) {
+            return bookOptional.get();
+        } else {
+            throw new RuntimeException("Book not found with id: " + bookId);
+        }
+    }
+
     //Book add
     public BookResponseDTO addBook(BookRequestDTO req) {
 
