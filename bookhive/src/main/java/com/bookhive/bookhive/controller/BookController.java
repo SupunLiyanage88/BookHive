@@ -1,8 +1,8 @@
 package com.bookhive.bookhive.controller;
 
-
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +48,7 @@ public class BookController {
     @PostMapping("/add")
     public ResponseEntity<BookResponseDTO> addBook(@RequestBody BookRequestDTO bookRequestDTO) {
         BookResponseDTO response = bookService.addBook(bookRequestDTO);
-        
+
         if (response.getError() != null) {
             return ResponseEntity.badRequest().body(response);
         }
@@ -56,7 +56,7 @@ public class BookController {
     }
 
     // Endpoint to update an existing book
-     @PutMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<BookResponseDTO> updateBook(
             @PathVariable("id") Long bookId,
             @RequestBody BookRequestDTO bookRequest) {
@@ -70,6 +70,21 @@ public class BookController {
         return ResponseEntity.ok(response);
     }
 
+    // Endpoint to update book status
+    @PutMapping("/{bookId}/status")
+    public ResponseEntity<BookResponseDTO> updateBookStatus(
+            @PathVariable Long bookId,
+            @RequestBody BookRequestDTO requestDTO) {
+
+        BookResponseDTO responseDTO = bookService.updateBookStatus(requestDTO, bookId);
+
+        if (responseDTO.getError() != null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDTO);
+        }
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
     // Endpoint to delete a book
     @DeleteMapping("/{id}")
     public ResponseEntity<BookResponseDTO> deleteBook(@PathVariable("id") Long bookId) {
@@ -81,5 +96,5 @@ public class BookController {
 
         return ResponseEntity.ok(response);
     }
-    
+
 }

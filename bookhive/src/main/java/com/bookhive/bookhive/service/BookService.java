@@ -67,6 +67,19 @@ public class BookService {
         return new BookResponseDTO("Book Updated Successfully", null);
     }
 
+    // update only status
+    public BookResponseDTO updateBookStatus(BookRequestDTO req, Long bookId) {
+        Optional<BookEntity> bookOptional = bookRepository.findById(bookId);
+        if(bookOptional.isEmpty()){
+            return new BookResponseDTO(null, "Book not found");
+        }
+        BookEntity book = bookOptional.get();
+        book.setStatus(req.getStatus());
+
+        bookRepository.save(book);
+        return new BookResponseDTO("Book Status Updated Successfully", null);
+    }
+
     // book delete
     public BookResponseDTO deleteBook(Long bookId) {
         Optional<BookEntity> bookOptional = bookRepository.findById(bookId);

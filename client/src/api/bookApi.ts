@@ -1,5 +1,3 @@
-// src/api/bookApi.ts
-
 export interface Book {
   bookId: number;
   title: string;
@@ -110,6 +108,18 @@ export const deleteBook = async (id: number): Promise<BookResponseDTO> => {
     });
   } catch (error) {
     console.error(`Error deleting book with id ${id}:`, error);
+    throw error;
+  }
+};
+
+export const updateBookStatus = async (bookId: number, status: string): Promise<BookResponseDTO> => {
+  try {
+    return await fetchWithAuth(`/api/books/${bookId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  } catch (error) {
+    console.error(`Error updating status for book with id ${bookId}:`, error);
     throw error;
   }
 };

@@ -1,4 +1,3 @@
-// BookDetailPage.tsx
 import React, { useEffect, useState } from "react";
 import {
   Container,
@@ -19,19 +18,31 @@ import {
   Paper,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchBookById, updateBook, deleteBook } from "../api/bookApi";
+import { fetchBookById, updateBook, deleteBook, updateBookStatus  } from "../api/bookApi";
+import { addRental } from "../api/rentalApi";
 import type { Book } from "../api/bookApi";
+import type { RentalRequestDTO } from "../api/rentalApi";
 import { LoadingButton } from "@mui/lab";
-import { Edit, Delete, ArrowBack } from "@mui/icons-material";
+import { Edit, Delete, ArrowBack, Book as BookIcon } from "@mui/icons-material";
+import useUser from "../api/cutomHook"; // Import the useUser hook
 
 const BookDetailPage: React.FC = () => {
   const { bookId } = useParams();
+  const user = useUser(); // Get user info from the hook
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [rentDialogOpen, setRentDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<Partial<Book>>({});
+  const [rentalData, setRentalData] = useState<RentalRequestDTO>({
+    bookId: Number(bookId),
+    username: user?.username || "", // Pre-fill with logged-in user's username
+    rentalDate: new Date().toISOString().split("T")[0],
+    returnDate: "",
+  });
+  const [rentalDuration, setRentalDuration] = useState<number>(7);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -62,6 +73,16 @@ const BookDetailPage: React.FC = () => {
     loadBook();
   }, [bookId]);
 
+  useEffect(() => {
+    // Update username in rentalData when user changes
+    if (user?.username) {
+      setRentalData((prev) => ({
+        ...prev,
+        username: user.username,
+      }));
+    }
+  }, [user]);
+
   const handleDelete = async () => {
     try {
       if (!bookId) return;
@@ -83,9 +104,16 @@ const BookDetailPage: React.FC = () => {
   try {
     if (!bookId) return;
     setSubmitLoading(true);
-    const updatedBook = await updateBook(Number(bookId), formData as any);
-    // Reload the page
-    navigate(0);
+    
+    // If only status is being changed, use the specific endpoint
+    if (Object.keys(formData).length === 1 && formData.status) {
+      await updateBookStatus(Number(bookId), formData.status);
+    } else {
+      // For other updates, use the general update endpoint
+      const updatedBook = await updateBook(Number(bookId), formData as any);
+    }
+    
+    navigate(0); // Reload the page
   } catch (err) {
     setSubmitError("Failed to update book");
     console.error(err);
@@ -94,9 +122,54 @@ const BookDetailPage: React.FC = () => {
   }
 };
 
+  const handleRentBook = async () => {
+    try {
+      if (!bookId) return;
+      setSubmitLoading(true);
+
+      // Calculate return date based on duration
+      const returnDate = new Date(rentalData.rentalDate);
+      returnDate.setDate(returnDate.getDate() + rentalDuration);
+
+      const rentalRequest: RentalRequestDTO = {
+        bookId: Number(bookId),
+        username: rentalData.username,
+        rentalDate: rentalData.rentalDate,
+        returnDate: returnDate.toISOString().split("T")[0],
+      };
+
+      // Create rental record
+      await addRental(rentalRequest);
+
+      // Update book status to "Borrowed" using the new endpoint
+      await updateBookStatus(Number(bookId), "Borrowed");
+
+      // Show success and reload
+      setSubmitError(null);
+      setRentDialogOpen(false);
+      navigate(0); // Reload the page
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Failed to rent book"
+      );
+      console.error(err);
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRentalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRentalData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRentalDuration(Number(e.target.value));
   };
 
   if (loading) {
@@ -285,6 +358,16 @@ const BookDetailPage: React.FC = () => {
               </>
             ) : (
               <>
+                {book.status === "Available" && (
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<BookIcon />}
+                    onClick={() => setRentDialogOpen(true)}
+                  >
+                    Rent Book
+                  </Button>
+                )}
                 <Button
                   variant="outlined"
                   color="error"
@@ -326,6 +409,68 @@ const BookDetailPage: React.FC = () => {
             startIcon={<Delete />}
           >
             Delete
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Rent Book Dialog */}
+      <Dialog
+        open={rentDialogOpen}
+        onClose={() => setRentDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Rent Book</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <TextField
+              label="Your Username"
+              name="username"
+              value={rentalData.username}
+              onChange={handleRentalChange}
+              fullWidth
+              required
+              disabled={!!user?.username}
+            />
+            <TextField
+              label="Rental Date"
+              type="date"
+              name="rentalDate"
+              value={rentalData.rentalDate}
+              onChange={handleRentalChange}
+              fullWidth
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              label="Rental Duration (days)"
+              type="number"
+              value={rentalDuration}
+              onChange={handleDurationChange}
+              fullWidth
+              inputProps={{
+                min: 1,
+                max: 30,
+              }}
+            />
+            {submitError && (
+              <Alert severity="error" onClose={() => setSubmitError(null)}>
+                {submitError}
+              </Alert>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRentDialogOpen(false)}>Cancel</Button>
+          <LoadingButton
+            variant="contained"
+            onClick={handleRentBook}
+            loading={submitLoading}
+            startIcon={<BookIcon />}
+            disabled={!rentalData.username}
+          >
+            Confirm Rental
           </LoadingButton>
         </DialogActions>
       </Dialog>
