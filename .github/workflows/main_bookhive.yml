@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Java project to Azure Function App - bookhive
 
 on:
@@ -10,33 +7,31 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_NAME: bookhive # set this to your function app name on Azure
-  PACKAGE_DIRECTORY: '.' # set this to the directory which contains pom.xml file
-  JAVA_VERSION: '17' # set this to the java version to use
+  AZURE_FUNCTIONAPP_NAME: bookhive  # your Azure Function App name
+  PACKAGE_DIRECTORY: 'bookhive'     # points to backend folder
+  JAVA_VERSION: '17'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
+      - name: Setup Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v1
-        with: |+
+        with:
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: 'Restore Project Dependencies Using Mvn'
-        shell: pwsh
-        run: |+
-          pushd './${{ env.PACKAGE_DIRECTORY }}'
+      - name: Build backend with Maven
+        run: |
+          cd ${{ env.PACKAGE_DIRECTORY }}
           mvn clean package
-          popd
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -44,12 +39,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1539230A19C347A1AB7500F65A0FDD72 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_681A794CE7B54C15B34313A5FA3F9194 }}
 
-      - name: 'Run Azure Functions Action'
+      - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
-        id: fa
         with:
-          app-name: 'bookhive'
-          slot-name: 'Production'
-          package: '${{ env.PACKAGE_DIRECTORY }}'
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          slot-name: Production
+          package: ${{ env.PACKAGE_DIRECTORY }}
           respect-pom-xml: true
-          
