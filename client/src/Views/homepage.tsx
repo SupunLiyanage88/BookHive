@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Button, 
-  Box, 
-  Card, 
-  CardContent, 
-  CardActionArea, 
-  List, 
-  ListItem, 
+import React, { useEffect, useState } from "react";
+import {
+  Container,
+  Typography,
+  Button,
+  Box,
+  Card,
+  CardContent,
+  CardActionArea,
+  List,
+  ListItem,
   Divider,
   Chip,
   Stack,
@@ -28,17 +28,17 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { fetchAllBooks, addBook } from '../api/bookApi';
-import { fetchAllRentals } from '../api/rentalApi'; // Import the rentals API
-import type { Book, BookRequestDTO } from '../api/bookApi';
-import type { RentalEntity } from '../api/rentalApi'; // Import the rental types
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import { LoadingButton } from '@mui/lab';
+  TableRow,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { fetchAllBooks, addBook } from "../api/bookApi";
+import { fetchAllRentals } from "../api/rentalApi"; // Import the rentals API
+import type { Book, BookRequestDTO } from "../api/bookApi";
+import type { RentalEntity } from "../api/rentalApi"; // Import the rental types
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import { LoadingButton } from "@mui/lab";
 
 const Homepage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -50,10 +50,10 @@ const Homepage: React.FC = () => {
   const [rentalsError, setRentalsError] = useState<string | null>(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [formData, setFormData] = useState<BookRequestDTO>({
-    title: '',
-    author: '',
-    genre: '',
-    status: 'Available'
+    title: "",
+    author: "",
+    genre: "",
+    status: "Available",
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -66,7 +66,7 @@ const Homepage: React.FC = () => {
         const data = await fetchAllBooks();
         setBooks(data);
       } catch (err) {
-        setError('Failed to load books');
+        setError("Failed to load books");
         console.error(err);
       } finally {
         setLoading(false);
@@ -81,16 +81,16 @@ const Homepage: React.FC = () => {
       setShowRentals(false);
       return;
     }
-    
+
     setRentalsLoading(true);
     setRentalsError(null);
-    
+
     try {
       const data = await fetchAllRentals();
       setRentals(data);
       setShowRentals(true);
     } catch (err) {
-      setRentalsError('Failed to load rentals');
+      setRentalsError("Failed to load rentals");
       console.error(err);
     } finally {
       setRentalsLoading(false);
@@ -108,23 +108,25 @@ const Homepage: React.FC = () => {
   const handleCloseAddDialog = () => {
     setOpenAddDialog(false);
     setFormData({
-      title: '',
-      author: '',
-      genre: '',
-      status: 'Available'
+      title: "",
+      author: "",
+      genre: "",
+      status: "Available",
     });
     setFormErrors({});
     setSubmitError(null);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     if (formErrors[name]) {
-      setFormErrors(prev => {
+      setFormErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
@@ -134,33 +136,33 @@ const Homepage: React.FC = () => {
 
   const handleSelectChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
-    if (!formData.title.trim()) errors.title = 'Title is required';
-    if (!formData.author.trim()) errors.author = 'Author is required';
-    if (!formData.genre.trim()) errors.genre = 'Genre is required';
+    if (!formData.title.trim()) errors.title = "Title is required";
+    if (!formData.author.trim()) errors.author = "Author is required";
+    if (!formData.genre.trim()) errors.genre = "Genre is required";
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     setSubmitLoading(true);
     setSubmitError(null);
-    
+
     try {
       const newBook = await addBook(formData);
-      setBooks(prev => [...prev, newBook]);
+      setBooks((prev) => [...prev, newBook as Book]); // Add type assertion
       handleCloseAddDialog();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to add book');
+      setSubmitError(err instanceof Error ? err.message : "Failed to add book");
       console.error(err);
     } finally {
       setSubmitLoading(false);
@@ -181,7 +183,9 @@ const Homepage: React.FC = () => {
     return (
       <Container maxWidth="md">
         <Box textAlign="center" mt={8}>
-          <Typography variant="h6" color="error">{error}</Typography>
+          <Typography variant="h6" color="error">
+            {error}
+          </Typography>
         </Box>
       </Container>
     );
@@ -189,25 +193,31 @@ const Homepage: React.FC = () => {
 
   return (
     <Container maxWidth="md">
-      <Box display="flex" justifyContent="space-between" alignItems="center" mt={4} mb={4}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mt={4}
+        mb={4}
+      >
         <Typography variant="h4" component="h1">
           Library Catalog
         </Typography>
         <Box>
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             startIcon={<ListAltIcon />}
             onClick={handleLoadRentals}
-            sx={{ height: 'fit-content', mr: 2 }}
+            sx={{ height: "fit-content", mr: 2 }}
             disabled={rentalsLoading}
           >
-            {showRentals ? 'Hide Rentals' : 'Show Rentals'}
+            {showRentals ? "Hide Rentals" : "Show Rentals"}
           </Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             startIcon={<AddIcon />}
             onClick={handleOpenAddDialog}
-            sx={{ height: 'fit-content' }}
+            sx={{ height: "fit-content" }}
           >
             Add Book
           </Button>
@@ -246,11 +256,13 @@ const Homepage: React.FC = () => {
                       <TableCell>{rental.rentalId}</TableCell>
                       <TableCell>{rental.bookId}</TableCell>
                       <TableCell>{rental.username}</TableCell>
-                      <TableCell>{new Date(rental.rentalDate).toLocaleDateString()}</TableCell>
                       <TableCell>
-                        {rental.returnDate 
-                          ? new Date(rental.returnDate).toLocaleDateString() 
-                          : 'Not returned'}
+                        {new Date(rental.rentalDate).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {rental.returnDate
+                          ? new Date(rental.returnDate).toLocaleDateString()
+                          : "Not returned"}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -270,11 +282,11 @@ const Homepage: React.FC = () => {
           </Typography>
 
           <Card variant="outlined">
-            <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+            <List sx={{ width: "100%", bgcolor: "background.paper" }}>
               {books.map((book, index) => (
                 <React.Fragment key={book.bookId}>
                   <ListItem alignItems="flex-start" disablePadding>
-                    <CardActionArea 
+                    <CardActionArea
                       onClick={() => handleBookClick(book.bookId)}
                       sx={{ p: 2 }}
                     >
@@ -283,17 +295,23 @@ const Homepage: React.FC = () => {
                           <Typography variant="h6" component="div">
                             {book.title}
                           </Typography>
-                          <Chip 
-                            label={book.status} 
+                          <Chip
+                            label={book.status}
                             size="small"
-                            color={book.status === 'Available' ? 'success' : 'error'}
+                            color={
+                              book.status === "Available" ? "success" : "error"
+                            }
                           />
                         </Box>
                         <Typography variant="subtitle1" color="text.secondary">
                           by {book.author}
                         </Typography>
                         <Stack direction="row" spacing={1} mt={1}>
-                          <Chip label={book.genre} size="small" variant="outlined" />
+                          <Chip
+                            label={book.genre}
+                            size="small"
+                            variant="outlined"
+                          />
                         </Stack>
                       </CardContent>
                     </CardActionArea>
@@ -307,9 +325,18 @@ const Homepage: React.FC = () => {
       )}
 
       {/* Add Book Dialog */}
-      <Dialog open={openAddDialog} onClose={handleCloseAddDialog} fullWidth maxWidth="sm">
+      <Dialog
+        open={openAddDialog}
+        onClose={handleCloseAddDialog}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             Add New Book
             <Button onClick={handleCloseAddDialog} color="inherit">
               <CloseIcon />

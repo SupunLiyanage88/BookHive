@@ -18,7 +18,12 @@ import {
   Paper,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchBookById, updateBook, deleteBook, updateBookStatus  } from "../api/bookApi";
+import {
+  fetchBookById,
+  updateBook,
+  deleteBook,
+  updateBookStatus,
+} from "../api/bookApi";
 import { addRental } from "../api/rentalApi";
 import type { Book } from "../api/bookApi";
 import type { RentalRequestDTO } from "../api/rentalApi";
@@ -73,12 +78,13 @@ const BookDetailPage: React.FC = () => {
     loadBook();
   }, [bookId]);
 
+  // Change this useEffect
   useEffect(() => {
     // Update username in rentalData when user changes
     if (user?.username) {
       setRentalData((prev) => ({
         ...prev,
-        username: user.username,
+        username: user.username || "", // Provide fallback empty string
       }));
     }
   }, [user]);
@@ -101,26 +107,26 @@ const BookDetailPage: React.FC = () => {
   };
 
   const handleUpdate = async () => {
-  try {
-    if (!bookId) return;
-    setSubmitLoading(true);
-    
-    // If only status is being changed, use the specific endpoint
-    if (Object.keys(formData).length === 1 && formData.status) {
-      await updateBookStatus(Number(bookId), formData.status);
-    } else {
-      // For other updates, use the general update endpoint
-      const updatedBook = await updateBook(Number(bookId), formData as any);
+    try {
+      if (!bookId) return;
+      setSubmitLoading(true);
+
+      // If only status is being changed, use the specific endpoint
+      if (Object.keys(formData).length === 1 && formData.status) {
+        await updateBookStatus(Number(bookId), formData.status);
+      } else {
+        // For other updates, use the general update endpoint
+        const updatedBook = await updateBook(Number(bookId), formData as any);
+      }
+
+      navigate(0); // Reload the page
+    } catch (err) {
+      setSubmitError("Failed to update book");
+      console.error(err);
+    } finally {
+      setSubmitLoading(false);
     }
-    
-    navigate(0); // Reload the page
-  } catch (err) {
-    setSubmitError("Failed to update book");
-    console.error(err);
-  } finally {
-    setSubmitLoading(false);
-  }
-};
+  };
 
   const handleRentBook = async () => {
     try {
