@@ -152,22 +152,24 @@ const Homepage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    setSubmitLoading(true);
-    setSubmitError(null);
+  setSubmitLoading(true);
+  setSubmitError(null);
 
-    try {
-      const newBook = await addBook(formData);
-      setBooks((prev) => [...prev, newBook as Book]); // Add type assertion
-      handleCloseAddDialog();
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to add book");
-      console.error(err);
-    } finally {
-      setSubmitLoading(false);
-    }
-  };
+  try {
+    await addBook(formData);
+    // Refetch all books to ensure we have the latest data
+    const updatedBooks = await fetchAllBooks();
+    setBooks(updatedBooks);
+    handleCloseAddDialog();
+  } catch (err) {
+    setSubmitError(err instanceof Error ? err.message : "Failed to add book");
+    console.error(err);
+  } finally {
+    setSubmitLoading(false);
+  }
+};
 
   if (loading) {
     return (
