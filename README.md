@@ -201,6 +201,4 @@ library-management-system/
 
 
 
----
 
-**Note**: Make sure to replace `{{baseURL}}` with `http://localhost:8080` in your actual implementation and update any placeholder values with your specific configuration.
